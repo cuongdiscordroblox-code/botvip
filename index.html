@@ -2,68 +2,65 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BOT VIP SYSTEM 2026</title>
+    <title>BOT VIP SYSTEM V4</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 15px; }
-        .box { border: 1px solid #0f0; padding: 15px; max-width: 400px; margin: auto; box-shadow: 0 0 10px #0f0; }
-        .info { color: #0ff; margin-bottom: 15px; font-size: 0.9em; border-bottom: 1px dashed #0f0; padding-bottom: 10px; }
-        #screen { background: #050505; height: 100px; padding: 10px; margin-bottom: 15px; overflow-y: auto; border: 1px inset #0f0; }
-        input { background: #000; color: #0f0; border: 1px solid #0f0; width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer; margin-bottom: 5px; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 15px; text-align: center; }
+        .box { border: 2px solid #0f0; padding: 20px; max-width: 450px; margin: auto; box-shadow: 0 0 20px #0f0; background: #050505; }
+        .info { color: #0ff; margin-bottom: 20px; text-align: left; font-size: 0.85em; border-bottom: 1px dashed #0f0; padding-bottom: 10px; }
+        #screen { background: #000; height: 100px; padding: 10px; margin-bottom: 15px; border: 1px inset #0f0; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
+        input { background: #111; color: #0f0; border: 1px solid #0f0; width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
+        button { width: 100%; padding: 15px; background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; text-transform: uppercase; }
         .vip { background: #ff0; }
+        button:active { transform: scale(0.98); }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
 
 <div class="box">
-    <h3 style="text-align:center;">CMD: BOT_PRO_V4.0</h3>
-    
+    <h2>SYSTEM CONTROL V4.2</h2>
     <div class="info">
-        ID: <span id="dev-id">...</span><br>
-        IP: <span id="user-ip">...</span>
+        <b>ID THIẾT BỊ:</b> <span id="dev-id">...</span><br>
+        <b>IP MẠNG:</b> <span id="user-ip">...</span>
     </div>
-
-    <div id="screen">Đang khởi tạo...</div>
-
-    <input type="text" id="user-key" placeholder="Dán Key VIP (Nếu mua)">
-    <input type="text" id="history" placeholder="Nhập cầu (v.d: b,c,t)">
-
-    <button onclick="layKeyFree()">LẤY KEY FREE (24H)</button>
-    <button class="vip" onclick="soiCau()">SOI CẦU VIP</button>
+    <div id="screen">ĐANG KẾT NỐI...</div>
+    <input type="text" id="user-key" placeholder="DÁN KEY VIP TẠI ĐÂY">
+    <input type="text" id="history" placeholder="LỊCH SỬ (V.D: B,C,T)">
+    <button onclick="layKeyFree()">LẤY KEY FREE (VUỘT LINK)</button>
+    <button class="vip" onclick="soiCau()">SOI CẦU DỰ ĐOÁN</button>
 </div>
 
 <script>
     let deviceId = "";
     let userIP = "";
-    // THAY LINK CỦA ÔNG VÀO ĐÂY
+    // THAY DUNG LINK PYTHONANYWHERE CUA ONG
     const API = "https://tên-của-ông.pythonanywhere.com"; 
 
     async function init() {
+        const screen = document.getElementById('screen');
         try {
-            // Lấy ID máy
             const fp = await FingerprintJS.load();
             const result = await fp.get();
             deviceId = result.visitorId;
             document.getElementById('dev-id').innerText = deviceId;
 
-            // Lấy IP từ Server
             const res = await fetch(`${API}/get_info`);
             const data = await res.json();
             userIP = data.ip;
             document.getElementById('user-ip').innerText = userIP;
 
-            document.getElementById('screen').innerText = "Hệ thống sẵn sàng!";
+            screen.innerText = "HỆ THỐNG SẴN SÀNG!";
         } catch (e) {
-            document.getElementById('screen').innerText = "LỖI KẾT NỐI SERVER!";
+            screen.innerText = "LỖI KẾT NỐI SERVER!";
+            console.error(e);
         }
     }
 
     function layKeyFree() {
         if(!deviceId) return;
         const target = `${API}/activate?id=${deviceId}`;
-        const shortLink = "https://link1s.com/st?api=TOKEN&url=" + encodeURIComponent(target);
+        const shortLink = "https://link1s.com/st?api=TOKEN_CUA_ONG&url=" + encodeURIComponent(target);
         window.location.href = shortLink;
     }
 
@@ -72,7 +69,7 @@
         const hist = document.getElementById('history').value;
         const screen = document.getElementById('screen');
         
-        screen.innerText = "Đang xử lý...";
+        screen.innerText = "ĐANG TÍNH TOÁN...";
         try {
             const res = await fetch(`${API}/predict`, {
                 method: 'POST',
@@ -81,16 +78,15 @@
             });
             const data = await res.json();
             if (data.status === "ok") {
-                screen.innerHTML = `<span style="color:#0f0;">> KẾT QUẢ: ${data.data}</span>`;
+                screen.innerHTML = `<span style="color:#0f0;">${data.data}</span>`;
             } else {
-                screen.innerHTML = `<span style="color:red;">[!] ${data.msg}</span>`;
+                screen.innerHTML = `<span style="color:red;">${data.msg}</span>`;
             }
         } catch (e) {
-            screen.innerText = "LỖI SERVER!";
+            screen.innerText = "SERVER KHÔNG PHẢN HỒI!";
         }
     }
     init();
 </script>
-
 </body>
 </html>
