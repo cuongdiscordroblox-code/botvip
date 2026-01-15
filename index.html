@@ -2,88 +2,77 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BOT VIP BAU CUA 2026</title>
+    <title>BOT VIP SYSTEM 2026</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; }
-        .container { max-width: 500px; margin: auto; border: 1px solid #0f0; padding: 20px; box-shadow: 0 0 15px #0f0; }
-        #screen { background: #050505; border: 1px inset #0f0; padding: 15px; min-height: 120px; margin-bottom: 20px; font-size: 0.85em; white-space: pre-wrap; color: #0f0; }
-        input { background: #000; color: #0f0; border: 1px solid #0f0; width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 10px; outline: none; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { background: #0f0; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-        button:hover { background: #0a0; }
-        .vip-btn { background: #ff0; }
-        .info-box { color: #0ff; font-weight: bold; margin-bottom: 15px; border: 1px dashed #0f0; padding: 10px; font-size: 0.9em; line-height: 1.6; }
-        .info-label { color: #888; font-size: 0.8em; text-transform: uppercase; }
+        body { background: #000; color: #0f0; font-family: monospace; padding: 15px; }
+        .box { border: 1px solid #0f0; padding: 15px; max-width: 400px; margin: auto; box-shadow: 0 0 10px #0f0; }
+        .info { color: #0ff; margin-bottom: 15px; font-size: 0.9em; border-bottom: 1px dashed #0f0; padding-bottom: 10px; }
+        #screen { background: #050505; height: 100px; padding: 10px; margin-bottom: 15px; overflow-y: auto; border: 1px inset #0f0; }
+        input { background: #000; color: #0f0; border: 1px solid #0f0; width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer; margin-bottom: 5px; }
+        .vip { background: #ff0; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
 
-<div class="container">
-    <h2 style="text-align: center; color: #0f0;">CMD: BOT_PRO_V3.5</h2>
+<div class="box">
+    <h3 style="text-align:center;">CMD: BOT_PRO_V4.0</h3>
     
-    <div class="info-box">
-        <span class="info-label">ID Thiết bị:</span> <span id="dev-id">Đang lấy...</span><br>
-        <span class="info-label">IP Mạng:</span> <span id="user-ip">Đang lấy...</span>
+    <div class="info">
+        ID: <span id="dev-id">...</span><br>
+        IP: <span id="user-ip">...</span>
     </div>
 
-    <div id="screen">Hệ thống đang khởi động...</div>
+    <div id="screen">Đang khởi tạo...</div>
 
-    <input type="text" id="user-key" placeholder="Nhập Key VIP (Nếu có)">
-    <input type="text" id="history" placeholder="Nhập lịch sử (v.d: b,c,t)">
+    <input type="text" id="user-key" placeholder="Dán Key VIP (Nếu mua)">
+    <input type="text" id="history" placeholder="Nhập cầu (v.d: b,c,t)">
 
-    <div class="btn-group">
-        <button onclick="layKeyFree()">LẤY KEY FREE</button>
-        <button class="vip-btn" onclick="soiCau()">SOI CẦU VIP</button>
-    </div>
+    <button onclick="layKeyFree()">LẤY KEY FREE (24H)</button>
+    <button class="vip" onclick="soiCau()">SOI CẦU VIP</button>
 </div>
 
 <script>
     let deviceId = "";
     let userIP = "";
-    
-    // !!! QUAN TRỌNG: Thay đúng link PythonAnywhere của ông vào đây !!!
+    // THAY LINK CỦA ÔNG VÀO ĐÂY
     const API = "https://tên-của-ông.pythonanywhere.com"; 
 
     async function init() {
-        const screen = document.getElementById('screen');
         try {
-            // 1. Lấy ID máy
+            // Lấy ID máy
             const fp = await FingerprintJS.load();
             const result = await fp.get();
             deviceId = result.visitorId;
             document.getElementById('dev-id').innerText = deviceId;
 
-            // 2. Lấy IP từ chính Server của ông
+            // Lấy IP từ Server
             const res = await fetch(`${API}/get_info`);
             const data = await res.json();
             userIP = data.ip;
             document.getElementById('user-ip').innerText = userIP;
-            
-            screen.innerText = "Sẵn sàng nhận lệnh!";
+
+            document.getElementById('screen').innerText = "Hệ thống sẵn sàng!";
         } catch (e) {
-            console.error(e);
-            screen.innerHTML = "<span style='color:red;'>[!] LỖI KẾT NỐI SERVER!<br>Hãy kiểm tra lại link API hoặc Reload Server.</span>";
+            document.getElementById('screen').innerText = "LỖI KẾT NỐI SERVER!";
         }
     }
 
     function layKeyFree() {
-        if (!deviceId) return alert("Chờ hệ thống lấy ID!");
+        if(!deviceId) return;
         const target = `${API}/activate?id=${deviceId}`;
-        const link_rut_gon = "https://link1s.com/st?api=TOKEN&url=" + encodeURIComponent(target);
-        window.location.href = link_rut_gon;
+        const shortLink = "https://link1s.com/st?api=TOKEN&url=" + encodeURIComponent(target);
+        window.location.href = shortLink;
     }
 
     async function soiCau() {
         const key = document.getElementById('user-key').value;
         const hist = document.getElementById('history').value;
         const screen = document.getElementById('screen');
-
-        if (!hist) { alert("Vui lòng nhập lịch sử ván trước!"); return; }
-
-        screen.innerText = "Đang tính toán cầu...";
-
+        
+        screen.innerText = "Đang xử lý...";
         try {
             const res = await fetch(`${API}/predict`, {
                 method: 'POST',
@@ -91,17 +80,15 @@
                 body: JSON.stringify({ id: deviceId, key: key, history: hist })
             });
             const data = await res.json();
-
             if (data.status === "ok") {
                 screen.innerHTML = `<span style="color:#0f0;">> KẾT QUẢ: ${data.data}</span>`;
             } else {
                 screen.innerHTML = `<span style="color:red;">[!] ${data.msg}</span>`;
             }
-        } catch (err) {
-            screen.innerText = "LỖI: Server không phản hồi.";
+        } catch (e) {
+            screen.innerText = "LỖI SERVER!";
         }
     }
-
     init();
 </script>
 
