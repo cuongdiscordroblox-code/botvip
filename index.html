@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>CMD BOT BAU CUA v1</title>
     <style>
         body { background: black; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; }
-        #screen { border: 1px solid #0f0; padding: 15px; min-height: 300px; margin-bottom: 10px; }
-        input { background: black; color: #0f0; border: 1px solid #0f0; width: 80%; padding: 5px; outline: none; }
+        #screen { border: 1px solid #0f0; padding: 15px; min-height: 200px; margin-bottom: 10px; white-space: pre-wrap; }
+        input { background: black; color: #0f0; border: 1px solid #0f0; width: 70%; padding: 5px; outline: none; }
         button { background: #0f0; border: none; padding: 6px 15px; font-weight: bold; cursor: pointer; }
     </style>
-    <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
-    <h2>SYSTEM: BOT_BAU_CUA_V3.2</h2>
-    <div id="screen">Đang kiểm tra ID thiết bị...</div>
+    <h2>SYSTEM: BOT_BAU_CUA_V1</h2>
+    <div id="screen">Đang khởi tạo hệ thống...</div>
     
     <div id="input-group" style="display:none;">
         C:\USER\> Nhập lịch sử (vd: b,c,t): <input type="text" id="hist">
@@ -20,46 +21,53 @@
     </div>
 
     <div id="key-group" style="display:none;">
-        <p style="color:red">ERROR: ACCESS DENIED. NEED KEY!</p>
+        <p style="color:red">[!] ACCESS DENIED. NEED KEY!</p>
         <button onclick="layKey()">[ NHẤN VÀO ĐÂY ĐỂ LẤY KEY 24H ]</button>
     </div>
 
     <script>
         let deviceId = "";
-        // THAY LINK PYTHONANYWHERE CỦA ÔNG VÀO ĐÂY
-        const API = "https://trustmebro.pythonanywhere.com";
+        // THAY ĐÚNG USERNAME CỦA ÔNG VÀO ĐÂY
+        const API = "https://trustmebro.pythonanywhere.com"; 
 
         async function init() {
-            const fp = await FingerprintJS.load();
-            const res = await fp.get();
-            deviceId = res.visitorId;
-            
-            // Thử soi cầu với dữ liệu trống để check Key
-            const check = await fetch(`${API}/predict`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({id: deviceId, history: ""})
-            });
-            const data = await check.json();
-            
-            if(data.status === "no_key") {
-                document.getElementById('key-group').style.display = "block";
-                document.getElementById('screen').innerText = "Vui lòng vượt link để kích hoạt.";
-            } else {
-                document.getElementById('input-group').style.display = "block";
-                document.getElementById('screen').innerText = "Hệ thống sẵn sàng. Nhập lịch sử để soi.";
+            try {
+                // Cách gọi FingerprintJS bản v3 (không bị lỗi export)
+                const fp = await FingerprintJS.load();
+                const result = await fp.get();
+                deviceId = result.visitorId;
+                
+                document.getElementById('screen').innerText = "ID Thiết bị: " + deviceId + "\nĐang kiểm tra Key...";
+
+                const check = await fetch(`${API}/predict`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id: deviceId, history: ""})
+                });
+                const data = await check.json();
+                
+                if(data.status === "no_key") {
+                    document.getElementById('key-group').style.display = "block";
+                    document.getElementById('screen').innerText += "\n[!] Chưa kích hoạt.";
+                } else {
+                    document.getElementById('input-group').style.display = "block";
+                    document.getElementById('screen').innerText += "\n[OK] Đã kích hoạt. Sẵn sàng!";
+                }
+            } catch (e) {
+                document.getElementById('screen').innerText = "Lỗi kết nối Server: " + e.message;
             }
         }
 
         function layKey() {
-            // Thay link rút gọn của ông vào đây
-            const rutgon = "https://link1s.com/st?api=TOKEN_CUA_ONG&url=";
+            // Nhớ thay link rút gọn của ông vào đây
             const target = `${API}/activate?id=${deviceId}`;
-            window.location.href = rutgon + encodeURIComponent(target);
+            window.location.href = "https://link1s.com/st?api=YOUR_TOKEN&url=" + encodeURIComponent(target);
         }
 
         async function soi() {
             const txt = document.getElementById('hist').value;
+            if(!txt) return;
+            
             const res = await fetch(`${API}/predict`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -67,7 +75,9 @@
             });
             const data = await res.json();
             document.getElementById('screen').innerText += `\n> Nhập: ${txt}\n> Bot: ${data.data}`;
+            document.getElementById('hist').value = "";
         }
+        
         init();
     </script>
 </body>
