@@ -7,28 +7,31 @@
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; }
         .container { max-width: 500px; margin: auto; border: 1px solid #0f0; padding: 20px; box-shadow: 0 0 15px #0f0; }
-        #screen { background: #050505; border: 1px inset #0f0; padding: 15px; min-height: 150px; margin-bottom: 20px; font-size: 0.85em; white-space: pre-wrap; }
+        #screen { background: #050505; border: 1px inset #0f0; padding: 15px; min-height: 120px; margin-bottom: 20px; font-size: 0.85em; white-space: pre-wrap; color: #0f0; }
         input { background: #000; color: #0f0; border: 1px solid #0f0; width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 10px; outline: none; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button { background: #0f0; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; }
+        button { background: #0f0; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0a0; }
         .vip-btn { background: #ff0; }
-        .info-box { color: #00ffff; font-weight: bold; margin-bottom: 10px; border-bottom: 1px dashed #0f0; padding-bottom: 10px; }
+        .info-box { color: #0ff; font-weight: bold; margin-bottom: 15px; border: 1px dashed #0f0; padding: 10px; font-size: 0.9em; line-height: 1.6; }
+        .info-label { color: #888; font-size: 0.8em; text-transform: uppercase; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align: center;">SYSTEM CONTROL V3.2</h2>
+    <h2 style="text-align: center; color: #0f0;">CMD: BOT_PRO_V3.5</h2>
     
-    <div class="info-box" id="device-info">
-        Đang quét ID & IP...
+    <div class="info-box">
+        <span class="info-label">ID Thiết bị:</span> <span id="dev-id">Đang lấy...</span><br>
+        <span class="info-label">IP Mạng:</span> <span id="user-ip">Đang lấy...</span>
     </div>
 
-    <div id="screen">Sẵn sàng nhận lệnh...</div>
+    <div id="screen">Hệ thống đang khởi động...</div>
 
-    <input type="text" id="user-key" placeholder="Dán Key VIP tại đây">
-    <input type="text" id="history" placeholder="Lịch sử (vd: b,c,g)">
+    <input type="text" id="user-key" placeholder="Nhập Key VIP (Nếu có)">
+    <input type="text" id="history" placeholder="Nhập lịch sử (v.d: b,c,t)">
 
     <div class="btn-group">
         <button onclick="layKeyFree()">LẤY KEY FREE</button>
@@ -39,31 +42,34 @@
 <script>
     let deviceId = "";
     let userIP = "";
-    const API = "https://tên-của-ông.pythonanywhere.com"; // THAY LINK CỦA ÔNG
+    
+    // !!! QUAN TRỌNG: Thay đúng link PythonAnywhere của ông vào đây !!!
+    const API = "https://tên-của-ông.pythonanywhere.com"; 
 
     async function init() {
+        const screen = document.getElementById('screen');
         try {
-            // 1. Lấy ID Thiết bị
+            // 1. Lấy ID máy
             const fp = await FingerprintJS.load();
             const result = await fp.get();
             deviceId = result.visitorId;
+            document.getElementById('dev-id').innerText = deviceId;
 
-            // 2. Lấy IP mạng (Dùng dịch vụ công khai)
-            const ipRes = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipRes.json();
-            userIP = ipData.ip;
-
-            // Hiển thị lên cho khách thấy để gửi cho ông
-            document.getElementById('device-info').innerHTML = 
-                `ID: ${deviceId}<br>IP: ${userIP}`;
+            // 2. Lấy IP từ chính Server của ông
+            const res = await fetch(`${API}/get_info`);
+            const data = await res.json();
+            userIP = data.ip;
+            document.getElementById('user-ip').innerText = userIP;
             
+            screen.innerText = "Sẵn sàng nhận lệnh!";
         } catch (e) {
-            document.getElementById('device-info').innerText = "Lỗi lấy thông tin máy!";
+            console.error(e);
+            screen.innerHTML = "<span style='color:red;'>[!] LỖI KẾT NỐI SERVER!<br>Hãy kiểm tra lại link API hoặc Reload Server.</span>";
         }
     }
 
     function layKeyFree() {
-        if (!deviceId) return alert("Chưa có ID!");
+        if (!deviceId) return alert("Chờ hệ thống lấy ID!");
         const target = `${API}/activate?id=${deviceId}`;
         const link_rut_gon = "https://link1s.com/st?api=TOKEN&url=" + encodeURIComponent(target);
         window.location.href = link_rut_gon;
@@ -73,6 +79,10 @@
         const key = document.getElementById('user-key').value;
         const hist = document.getElementById('history').value;
         const screen = document.getElementById('screen');
+
+        if (!hist) { alert("Vui lòng nhập lịch sử ván trước!"); return; }
+
+        screen.innerText = "Đang tính toán cầu...";
 
         try {
             const res = await fetch(`${API}/predict`, {
@@ -88,7 +98,7 @@
                 screen.innerHTML = `<span style="color:red;">[!] ${data.msg}</span>`;
             }
         } catch (err) {
-            screen.innerText = "LỖI KẾT NỐI SERVER!";
+            screen.innerText = "LỖI: Server không phản hồi.";
         }
     }
 
