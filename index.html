@@ -5,60 +5,67 @@
     <title>BOT VIP BAU CUA 2026</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; line-height: 1.5; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; }
         .container { max-width: 500px; margin: auto; border: 1px solid #0f0; padding: 20px; box-shadow: 0 0 15px #0f0; }
-        #screen { background: #050505; border: 1px inset #0f0; padding: 15px; height: 150px; overflow-y: auto; margin-bottom: 20px; font-size: 0.9em; }
+        #screen { background: #050505; border: 1px inset #0f0; padding: 15px; min-height: 150px; margin-bottom: 20px; font-size: 0.85em; white-space: pre-wrap; }
         input { background: #000; color: #0f0; border: 1px solid #0f0; width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 10px; outline: none; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         button { background: #0f0; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; }
-        button:hover { background: #0a0; }
-        .vip-btn { background: #ff0; color: #000; } /* Nút soi cầu nổi bật */
+        .vip-btn { background: #ff0; }
+        .info-box { color: #00ffff; font-weight: bold; margin-bottom: 10px; border-bottom: 1px dashed #0f0; padding-bottom: 10px; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align: center;">CMD: BOT_PRO_V3.2</h2>
-    <div id="screen">Đang quét hệ thống...</div>
+    <h2 style="text-align: center;">SYSTEM CONTROL V3.2</h2>
+    
+    <div class="info-box" id="device-info">
+        Đang quét ID & IP...
+    </div>
 
-    <input type="text" id="user-key" placeholder="Dán Key VIP vào đây (nếu có)">
+    <div id="screen">Sẵn sàng nhận lệnh...</div>
 
-    <input type="text" id="history" placeholder="Nhập lịch sử (v.d: b,c,t)">
+    <input type="text" id="user-key" placeholder="Dán Key VIP tại đây">
+    <input type="text" id="history" placeholder="Lịch sử (vd: b,c,g)">
 
     <div class="btn-group">
         <button onclick="layKeyFree()">LẤY KEY FREE</button>
         <button class="vip-btn" onclick="soiCau()">SOI CẦU VIP</button>
     </div>
-    
-    <p style="font-size: 0.7em; color: #888; margin-top: 15px;">
-        * Lưu ý: Key Free có tác dụng 24h sau khi vượt link.<br>
-        * Key VIP: Khóa theo ID máy và mạng (IP).
-    </p>
 </div>
 
 <script>
     let deviceId = "";
-    // THAY LINK SERVER PYTHONANYWHERE CỦA ÔNG VÀO ĐÂY
-    const API = "https://tên-của-ông.pythonanywhere.com";
+    let userIP = "";
+    const API = "https://tên-của-ông.pythonanywhere.com"; // THAY LINK CỦA ÔNG
 
     async function init() {
         try {
+            // 1. Lấy ID Thiết bị
             const fp = await FingerprintJS.load();
             const result = await fp.get();
             deviceId = result.visitorId;
-            document.getElementById('screen').innerText = "ID THIẾT BỊ: " + deviceId + "\nTRẠNG THÁI: ĐANG CHỜ...";
+
+            // 2. Lấy IP mạng (Dùng dịch vụ công khai)
+            const ipRes = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipRes.json();
+            userIP = ipData.ip;
+
+            // Hiển thị lên cho khách thấy để gửi cho ông
+            document.getElementById('device-info').innerHTML = 
+                `ID: ${deviceId}<br>IP: ${userIP}`;
+            
         } catch (e) {
-            document.getElementById('screen').innerText = "LỖI KHỞI TẠO ID!";
+            document.getElementById('device-info').innerText = "Lỗi lấy thông tin máy!";
         }
     }
 
     function layKeyFree() {
-        if (!deviceId) return alert("Chưa lấy được ID máy!");
-        // Link đích để Server kích hoạt tự động
+        if (!deviceId) return alert("Chưa có ID!");
         const target = `${API}/activate?id=${deviceId}`;
-        // Thay link rút gọn của ông vào đây
-        const link_rut_gon = "https://link1s.com/st?api=TOKEN_CỦA_ÔNG&url=" + encodeURIComponent(target);
+        const link_rut_gon = "https://link1s.com/st?api=TOKEN&url=" + encodeURIComponent(target);
         window.location.href = link_rut_gon;
     }
 
@@ -66,8 +73,6 @@
         const key = document.getElementById('user-key').value;
         const hist = document.getElementById('history').value;
         const screen = document.getElementById('screen');
-
-        screen.innerText = "Đang gửi dữ liệu lên Server...";
 
         try {
             const res = await fetch(`${API}/predict`, {
@@ -78,11 +83,9 @@
             const data = await res.json();
 
             if (data.status === "ok") {
-                screen.innerHTML = `<span style="color:yellow;">> KẾT QUẢ: ${data.data}</span>`;
-            } else if (data.status === "no_key") {
-                screen.innerHTML = `<span style="color:red;">[!] LỖI: ${data.msg}</span>`;
+                screen.innerHTML = `<span style="color:#0f0;">> KẾT QUẢ: ${data.data}</span>`;
             } else {
-                screen.innerHTML = `<span style="color:orange;">[!] LỖI: ${data.msg}</span>`;
+                screen.innerHTML = `<span style="color:red;">[!] ${data.msg}</span>`;
             }
         } catch (err) {
             screen.innerText = "LỖI KẾT NỐI SERVER!";
