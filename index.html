@@ -2,62 +2,137 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BOT VIP bc3.2</title>
+    <title>BOT VIP BC3.2 - LOGIN</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #0f0; font-family: sans-serif; text-align: center; padding: 20px; }
-        .container { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: auto; background: #0a0a0a; box-shadow: 0 0 20px #0f0; }
-        input { width: 90%; padding: 10px; margin: 10px 0; background: #111; color: #0f0; border: 1px solid #0f0; text-align: center; }
-        button { width: 95%; padding: 15px; background: #0f0; color: #000; font-weight: bold; border: none; cursor: pointer; }
-        #result { margin-top: 20px; padding: 15px; border: 1px dashed #0f0; min-height: 50px; }
+        body { background: #000; color: #0f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
+        .box { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: 50px auto; background: #050505; box-shadow: 0 0 20px #0f0; border-radius: 10px; }
+        
+        /* Giao diện nhập liệu */
+        input { width: 90%; padding: 12px; margin: 10px 0; background: #111; color: #ff0; border: 1px solid #0f0; outline: none; border-radius: 5px; text-align: center; font-weight: bold; }
+        button { width: 95%; padding: 15px; margin: 5px 0; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; transition: 0.3s; }
+        
+        .btn-login { background: #0f0; color: #000; font-size: 1.1em; }
+        .btn-login:hover { background: #0c0; transform: scale(1.02); }
+        .btn-free { background: #333; color: #fff; font-size: 0.8em; margin-top: 15px; }
+        
+        /* Hiệu ứng ẩn/hiện */
+        .hidden { display: none; }
+        
+        #screen { background: #000; border: 1px solid #0f0; padding: 20px; min-height: 80px; margin: 15px 0; font-size: 1.2em; display: flex; align-items: center; justify-content: center; color: #fff; }
+        .status-id { font-size: 0.7em; color: #888; margin-bottom: 20px; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h2>BOT VIP bc3.2</h2>
-        <p style="font-size: 0.8em;">ID MÁY: <span id="did" style="color: #ff0;">...</span></p>
-        <input type="text" id="key" placeholder="NHẬP KEY VIP">
-        <input type="text" id="history" placeholder="Ví dụ: bau,cua,tom|ca,ga,ga">
-        <button onclick="soiCau()">SOI CẦU NGAY</button>
-        <div id="result">KẾT QUẢ SẼ HIỆN Ở ĐÂY</div>
+
+    <div id="login-page" class="box">
+        <h2 style="color: #0f0; margin-bottom: 5px;">HỆ THỐNG BOT VIP</h2>
+        <p style="color: #ff0; font-size: 0.9em;">Vui lòng nhập Key để bắt đầu</p>
+        
+        <div class="status-id">ID MÁY: <span id="did-login">...</span></div>
+        
+        <input type="text" id="key-input" placeholder="DÁN MÃ KEY TẠI ĐÂY">
+        
+        <button class="btn-login" onclick="checkLogin()">ĐĂNG NHẬP NGAY</button>
+        <button class="btn-free" onclick="getFree()">LẤY MÃ FREE 24H (VƯỢT LINK)</button>
+        
+        <p style="font-size: 0.7em; color: #666; margin-top: 20px;">Liên hệ Admin để mua Key VIP không quảng cáo</p>
+    </div>
+
+    <div id="main-bot" class="box hidden">
+        <h3 style="color: #0f0; margin-top: 0;">BOT PHÂN TÍCH BC3.2</h3>
+        <div class="status-id">HẠN DÙNG: <span id="expiry-text" style="color: #ff0;">Đang xác thực...</span></div>
+        
+        <div id="screen">SẴN SÀNG PHÂN TÍCH</div>
+        
+        <p style="text-align: left; font-size: 0.8em; margin-left: 5%;">Nhập lịch sử (Ví dụ: bau,cua,tom|ca,ga,ga):</p>
+        <input type="text" id="hist-input" placeholder="ván 1 | ván 2 | ván 3">
+        
+        <button class="btn-login" onclick="soiCau()">BẮT ĐẦU SOI CẦU</button>
+        <button class="btn-free" onclick="location.reload()">ĐĂNG XUẤT / THOÁT</button>
     </div>
 
     <script>
         let dId = "";
-        // THAY LINK DƯỚI ĐÂY THÀNH LINK CỦA ÔNG (KHÔNG CÓ / Ở CUỐI)
-        const API = "https://trustmebro.pythonanywhere.com/";
+        // THAY LINK CỦA ÔNG VÀO ĐÂY (KHÔNG CÓ DẤU / Ở CUỐI)
+        const API = "https://trustmebro.pythonanywhere.com";
 
+        // Khởi tạo ID máy khi mở web
         async function init() {
             const fp = await FingerprintJS.load();
             const res = await fp.get();
             dId = res.visitorId;
-            document.getElementById('did').innerText = dId;
+            document.getElementById('did-login').innerText = dId;
+
+            // Nếu khách quay về từ link activate, tự động điền key và thử login luôn
+            const urlParams = new URLSearchParams(window.location.search);
+            const keyParam = urlParams.get('key');
+            if (keyParam) {
+                document.getElementById('key-input').value = keyParam;
+                checkLogin();
+            }
         }
 
-        async function soiCau() {
-            const resDiv = document.getElementById('result');
-            resDiv.innerText = "ĐANG PHÂN TÍCH CẦU...";
+        // Hàm kiểm tra Key để chuyển màn hình
+        async function checkLogin() {
+            const key = document.getElementById('key-input').value;
+            if (!key) { alert("Vui lòng nhập Key!"); return; }
+
             try {
+                // Gọi thử API để check Key (Dùng dữ liệu ảo để test key)
                 const response = await fetch(`${API}/predict`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        id: dId,
-                        key: document.getElementById('key').value,
-                        history: document.getElementById('history').value
-                    })
+                    body: JSON.stringify({ id: dId, key: key, history: "bau,bau,bau|bau,bau,bau|bau,bau,bau" })
                 });
                 const data = await response.json();
+
                 if (data.status === "ok") {
-                    resDiv.innerHTML = data.data;
+                    // Ẩn màn đăng nhập, hiện màn Bot
+                    document.getElementById('login-page').classList.add('hidden');
+                    document.getElementById('main-bot').classList.remove('hidden');
+                    // Hiển thị ngày hết hạn bóc tách từ kết quả trả về
+                    const cleanExpiry = data.data.split("<br>")[0]; 
+                    document.getElementById('expiry-text').innerHTML = cleanExpiry;
                 } else {
-                    resDiv.innerText = data.msg;
+                    alert("LỖI: " + data.msg);
                 }
             } catch (e) {
-                resDiv.innerText = "Lỗi kết nối Server! Kiểm tra lại link API hoặc Reload PythonAnywhere.";
+                alert("Không thể kết nối Server. Hãy kiểm tra lại API hoặc Reload PythonAnywhere.");
             }
         }
+
+        // Hàm soi cầu chính
+        async function soiCau() {
+            const scr = document.getElementById('screen');
+            const history = document.getElementById('hist-input').value;
+            const key = document.getElementById('key-input').value;
+
+            if (!history) { alert("Hãy nhập lịch sử ván đấu!"); return; }
+            scr.innerText = "ĐANG TÍNH TOÁN...";
+
+            const response = await fetch(`${API}/predict`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: dId, key: key, history: history })
+            });
+            const data = await response.json();
+            
+            if (data.status === "ok") {
+                scr.innerHTML = data.data.split("<br>")[1]; // Chỉ lấy phần DỰ ĐOÁN
+            } else {
+                scr.innerHTML = `<span style="color:red">${data.msg}</span>`;
+            }
+        }
+
+        // Hàm chuyển hướng vượt link
+        function getFree() {
+            const rootLink = `${API}/activate?id=${dId}`;
+            // Thay TOKEN của ông vào đây
+            window.location.href = "https://link1s.com/st?api=TOKEN_CỦA_ÔNG&url=" + encodeURIComponent(rootLink);
+        }
+
         init();
     </script>
 </body>
