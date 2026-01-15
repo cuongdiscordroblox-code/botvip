@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CMD BOT BAU CUA v1</title>
+    <style>
+        body { background: black; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; }
+        #screen { border: 1px solid #0f0; padding: 15px; min-height: 300px; margin-bottom: 10px; }
+        input { background: black; color: #0f0; border: 1px solid #0f0; width: 80%; padding: 5px; outline: none; }
+        button { background: #0f0; border: none; padding: 6px 15px; font-weight: bold; cursor: pointer; }
+    </style>
+    <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
+</head>
+<body>
+    <h2>SYSTEM: BOT_BAU_CUA_V3.2</h2>
+    <div id="screen">Đang kiểm tra ID thiết bị...</div>
+    
+    <div id="input-group" style="display:none;">
+        C:\USER\> Nhập lịch sử (vd: b,c,t): <input type="text" id="hist">
+        <button onclick="soi()">SEND</button>
+    </div>
+
+    <div id="key-group" style="display:none;">
+        <p style="color:red">ERROR: ACCESS DENIED. NEED KEY!</p>
+        <button onclick="layKey()">[ NHẤN VÀO ĐÂY ĐỂ LẤY KEY 24H ]</button>
+    </div>
+
+    <script>
+        let deviceId = "";
+        // THAY LINK PYTHONANYWHERE CỦA ÔNG VÀO ĐÂY
+        const API = "https://trustmebro.pythonanywhere.com";
+
+        async function init() {
+            const fp = await FingerprintJS.load();
+            const res = await fp.get();
+            deviceId = res.visitorId;
+            
+            // Thử soi cầu với dữ liệu trống để check Key
+            const check = await fetch(`${API}/predict`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: deviceId, history: ""})
+            });
+            const data = await check.json();
+            
+            if(data.status === "no_key") {
+                document.getElementById('key-group').style.display = "block";
+                document.getElementById('screen').innerText = "Vui lòng vượt link để kích hoạt.";
+            } else {
+                document.getElementById('input-group').style.display = "block";
+                document.getElementById('screen').innerText = "Hệ thống sẵn sàng. Nhập lịch sử để soi.";
+            }
+        }
+
+        function layKey() {
+            // Thay link rút gọn của ông vào đây
+            const rutgon = "https://link1s.com/st?api=TOKEN_CUA_ONG&url=";
+            const target = `${API}/activate?id=${deviceId}`;
+            window.location.href = rutgon + encodeURIComponent(target);
+        }
+
+        async function soi() {
+            const txt = document.getElementById('hist').value;
+            const res = await fetch(`${API}/predict`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: deviceId, history: txt})
+            });
+            const data = await res.json();
+            document.getElementById('screen').innerText += `\n> Nhập: ${txt}\n> Bot: ${data.data}`;
+        }
+        init();
+    </script>
+</body>
+</html>
