@@ -2,60 +2,95 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BOT VIP v3.2</title>
+    <title>BOT VIP BAU CUA 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
-        #screen { border: 1px solid #0f0; padding: 10px; margin-bottom: 10px; min-height: 100px; }
-        input { background: #000; color: #0f0; border: 1px solid #0f0; padding: 5px; margin: 5px 0; width: 80%; }
-        button { background: #0f0; color: #000; font-weight: bold; padding: 10px; cursor: pointer; border: none; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; padding: 20px; line-height: 1.5; }
+        .container { max-width: 500px; margin: auto; border: 1px solid #0f0; padding: 20px; box-shadow: 0 0 15px #0f0; }
+        #screen { background: #050505; border: 1px inset #0f0; padding: 15px; height: 150px; overflow-y: auto; margin-bottom: 20px; font-size: 0.9em; }
+        input { background: #000; color: #0f0; border: 1px solid #0f0; width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 10px; outline: none; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { background: #0f0; color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #0a0; }
+        .vip-btn { background: #ff0; color: #000; } /* Nút soi cầu nổi bật */
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
-    <h3>SYSTEM CONTROL - ANTI HACK</h3>
-    <div id="screen">Đang xác thực thiết bị...</div>
+
+<div class="container">
+    <h2 style="text-align: center;">CMD: BOT_PRO_V3.2</h2>
+    <div id="screen">Đang quét hệ thống...</div>
+
+    <input type="text" id="user-key" placeholder="Dán Key VIP vào đây (nếu có)">
+
+    <input type="text" id="history" placeholder="Nhập lịch sử (v.d: b,c,t)">
+
+    <div class="btn-group">
+        <button onclick="layKeyFree()">LẤY KEY FREE</button>
+        <button class="vip-btn" onclick="soiCau()">SOI CẦU VIP</button>
+    </div>
     
-    <div>
-        KEY: <input type="text" id="key" placeholder="Nhập Key kích hoạt">
-    </div>
-    <div>
-        CẦU: <input type="text" id="hist" placeholder="v.d: b,c,t">
-    </div>
-    <button onclick="soi()">PHÂN TÍCH</button>
+    <p style="font-size: 0.7em; color: #888; margin-top: 15px;">
+        * Lưu ý: Key Free có tác dụng 24h sau khi vượt link.<br>
+        * Key VIP: Khóa theo ID máy và mạng (IP).
+    </p>
+</div>
 
-    <script>
-        let deviceId = "";
-        const API = "https://ten-cua-ong.pythonanywhere.com"; // Thay tên của ông
+<script>
+    let deviceId = "";
+    // THAY LINK SERVER PYTHONANYWHERE CỦA ÔNG VÀO ĐÂY
+    const API = "https://tên-của-ông.pythonanywhere.com";
 
-        async function init() {
-            try {
-                const fp = await FingerprintJS.load();
-                const result = await fp.get();
-                deviceId = result.visitorId;
-                document.getElementById('screen').innerText = "ID Thiết bị: " + deviceId + "\nYêu cầu nhập Key để mở khóa.";
-            } catch (e) {
-                document.getElementById('screen').innerText = "Lỗi khởi tạo: " + e;
-            }
+    async function init() {
+        try {
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
+            deviceId = result.visitorId;
+            document.getElementById('screen').innerText = "ID THIẾT BỊ: " + deviceId + "\nTRẠNG THÁI: ĐANG CHỜ...";
+        } catch (e) {
+            document.getElementById('screen').innerText = "LỖI KHỞI TẠO ID!";
         }
+    }
 
-        async function soi() {
-            const k = document.getElementById('key').value;
-            const h = document.getElementById('hist').value;
-            
+    function layKeyFree() {
+        if (!deviceId) return alert("Chưa lấy được ID máy!");
+        // Link đích để Server kích hoạt tự động
+        const target = `${API}/activate?id=${deviceId}`;
+        // Thay link rút gọn của ông vào đây
+        const link_rut_gon = "https://link1s.com/st?api=TOKEN_CỦA_ÔNG&url=" + encodeURIComponent(target);
+        window.location.href = link_rut_gon;
+    }
+
+    async function soiCau() {
+        const key = document.getElementById('user-key').value;
+        const hist = document.getElementById('history').value;
+        const screen = document.getElementById('screen');
+
+        screen.innerText = "Đang gửi dữ liệu lên Server...";
+
+        try {
             const res = await fetch(`${API}/predict`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({id: deviceId, key: k, history: h})
+                body: JSON.stringify({ id: deviceId, key: key, history: hist })
             });
             const data = await res.json();
-            
-            if(data.status === "error") {
-                document.getElementById('screen').innerText = "[!] " + data.msg;
+
+            if (data.status === "ok") {
+                screen.innerHTML = `<span style="color:yellow;">> KẾT QUẢ: ${data.data}</span>`;
+            } else if (data.status === "no_key") {
+                screen.innerHTML = `<span style="color:red;">[!] LỖI: ${data.msg}</span>`;
             } else {
-                document.getElementById('screen').innerText = "> Kết quả: " + data.data;
+                screen.innerHTML = `<span style="color:orange;">[!] LỖI: ${data.msg}</span>`;
             }
+        } catch (err) {
+            screen.innerText = "LỖI KẾT NỐI SERVER!";
         }
-        init();
-    </script>
+    }
+
+    init();
+</script>
+
 </body>
 </html>
