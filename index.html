@@ -2,57 +2,86 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BOT VIP 2026</title>
+    <title>BOT VIP 2026 - bc3.2</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { background: #000; color: #0f0; font-family: monospace; padding: 20px; text-align: center; }
-        .box { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: auto; box-shadow: 0 0 15px #0f0; }
-        .id-box { color: #ff0; background: #222; padding: 10px; margin-bottom: 20px; border: 1px dashed #0f0; word-break: break-all; }
-        #screen { height: 80px; display: flex; align-items: center; justify-content: center; background: #111; border: 1px solid #0f0; margin-bottom: 15px; font-weight: bold; }
-        input { background: #000; color: #0f0; border: 1px solid #0f0; width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .box { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: auto; box-shadow: 0 0 15px #0f0; background: #050505; }
+        .id-box { color: #ff0; background: #111; padding: 10px; margin-bottom: 20px; border: 1px dashed #0f0; word-break: break-all; font-size: 0.9em; }
+        #screen { min-height: 80px; display: flex; align-items: center; justify-content: center; background: #000; border: 1px solid #0f0; margin-bottom: 15px; font-weight: bold; color: #fff; padding: 10px; line-height: 1.5; }
+        input { background: #111; color: #0f0; border: 1px solid #0f0; width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
+        button { width: 100%; padding: 15px; background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .vip { background: #ff0; }
+        .note { font-size: 0.75em; color: #888; margin-top: 10px; text-align: left; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
     <div class="box">
-        <h3>HỆ THỐNG VIP (CHỈ ID)</h3>
+        <h2 style="margin-top:0;">BOT PRO V5.0</h2>
         <div class="id-box">
-            ID CỦA BẠN:<br>
-            <span id="my-id">Đang quét...</span>
+            ID THIẾT BỊ:<br>
+            <span id="my-id">Quét ID...</span>
         </div>
         <div id="screen">CHỜ KHỞI TẠO...</div>
-        <input type="text" id="key" placeholder="NHẬP KEY VIP">
-        <input type="text" id="hist" placeholder="LỊCH SỬ (V.D: B,C,T)">
-        <button onclick="getFree()">VƯỢT LINK FREE</button>
-        <button class="vip" onclick="predict()">SOI CẦU VIP</button>
+        
+        <input type="text" id="key" placeholder="DÁN KEY VIP">
+        <input type="text" id="hist" placeholder="VD: bau,cua,tom | ca,ga,ga">
+        
+        <button onclick="getFree()">VƯỢT LINK FREE (24H)</button>
+        <button class="vip" onclick="predict()">SOI CẦU PHÂN TÍCH</button>
+
+        <div class="note">
+            * <b>HD:</b> Nhập 3 ván gần nhất. Các con cách nhau dấu <b>phẩy</b>, các ván cách nhau dấu <b>gạch đứng (|)</b>.
+        </div>
     </div>
 
     <script>
         let deviceId = "";
-        const API = "https://tên-của-ông.pythonanywhere.com"; // THAY LINK CỦA ÔNG
+        // THAY ĐÚNG LINK PYTHONANYWHERE CỦA ÔNG
+        const API = "https://tên-của-ông.pythonanywhere.com"; 
 
         async function init() {
-            const fp = await FingerprintJS.load();
-            const result = await fp.get();
-            deviceId = result.visitorId;
-            document.getElementById('my-id').innerText = deviceId;
-            document.getElementById('screen').innerText = "SẴN SÀNG!";
+            try {
+                const fp = await FingerprintJS.load();
+                const result = await fp.get();
+                deviceId = result.visitorId;
+                document.getElementById('my-id').innerText = deviceId;
+                document.getElementById('screen').innerText = "HỆ THỐNG SẴN SÀNG";
+            } catch (e) {
+                document.getElementById('screen').innerText = "LỖI KHỞI TẠO ID!";
+            }
         }
 
         function getFree() {
-            window.location.href = "https://link1s.com/st?api=TOKEN&url=" + encodeURIComponent(`${API}/activate?id=${deviceId}`);
+            if(!deviceId) return alert("Đang quét ID, đợi xíu!");
+            // Link rút gọn của ông
+            window.location.href = "https://link1s.com/st?api=TOKEN_CUA_ONG&url=" + encodeURIComponent(`${API}/activate?id=${deviceId}`);
         }
 
         async function predict() {
-            const res = await fetch(`${API}/predict`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id: deviceId, key: document.getElementById('key').value, history: document.getElementById('hist').value })
-            });
-            const data = await res.json();
-            document.getElementById('screen').innerText = data.status === "ok" ? data.data : data.msg;
+            const screen = document.getElementById('screen');
+            screen.innerText = "ĐANG PHÂN TÍCH...";
+            try {
+                const res = await fetch(`${API}/predict`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        id: deviceId, 
+                        key: document.getElementById('key').value, 
+                        history: document.getElementById('hist').value 
+                    })
+                });
+                const data = await res.json();
+                if(data.status === "ok") {
+                    // Hiển thị kết quả từ Server
+                    screen.innerHTML = `<span style="color:#0f0">${data.data}</span>`;
+                } else {
+                    screen.innerText = data.msg;
+                }
+            } catch (e) {
+                screen.innerText = "LỖI SERVER (KIỂM TRA RELOAD)";
+            }
         }
         init();
     </script>
