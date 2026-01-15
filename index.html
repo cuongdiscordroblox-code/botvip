@@ -2,86 +2,97 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BOT VIP 2026 - bc3.2</title>
+    <title>BOT VIP 2026 - LOGIN</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { background: #000; color: #0f0; font-family: monospace; padding: 20px; text-align: center; }
         .box { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: auto; box-shadow: 0 0 15px #0f0; background: #050505; }
-        .id-box { color: #ff0; background: #111; padding: 10px; margin-bottom: 20px; border: 1px dashed #0f0; word-break: break-all; font-size: 0.9em; }
-        #screen { min-height: 80px; display: flex; align-items: center; justify-content: center; background: #000; border: 1px solid #0f0; margin-bottom: 15px; font-weight: bold; color: #fff; padding: 10px; line-height: 1.5; }
-        input { background: #111; color: #0f0; border: 1px solid #0f0; width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
+        .id-box { color: #ff0; background: #111; padding: 10px; margin-bottom: 20px; border: 1px dashed #0f0; word-break: break-all; font-size: 0.8em; }
+        #screen { min-height: 80px; display: flex; align-items: center; justify-content: center; background: #000; border: 1px solid #0f0; margin-bottom: 15px; font-weight: bold; color: #fff; padding: 10px; }
+        input { background: #111; color: #0f0; border: 1px solid #0f0; width: 100%; padding: 12px; margin-bottom: 10px; box-sizing: border-box; outline: none; text-align: center; }
         button { width: 100%; padding: 15px; background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        .vip { background: #ff0; }
-        .note { font-size: 0.75em; color: #888; margin-top: 10px; text-align: left; }
+        .hidden { display: none; } /* Dùng để ẩn giao diện */
+        .vip-btn { background: #ff0; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
     <div class="box">
-        <h2 style="margin-top:0;">BOT PRO V5.0</h2>
-        <div class="id-box">
-            ID THIẾT BỊ:<br>
-            <span id="my-id">Quét ID...</span>
-        </div>
-        <div id="screen">CHỜ KHỞI TẠO...</div>
-        
-        <input type="text" id="key" placeholder="DÁN KEY VIP">
-        <input type="text" id="hist" placeholder="VD: bau,cua,tom | ca,ga,ga">
-        
-        <button onclick="getFree()">VƯỢT LINK FREE (24H)</button>
-        <button class="vip" onclick="predict()">SOI CẦU PHÂN TÍCH</button>
+        <h2 style="margin-top:0;">HỆ THỐNG BOT V5.0</h2>
+        <div class="id-box">ID MÁY: <span id="my-id">...</span></div>
 
-        <div class="note">
-            * <b>HD:</b> Nhập 3 ván gần nhất. Các con cách nhau dấu <b>phẩy</b>, các ván cách nhau dấu <b>gạch đứng (|)</b>.
+        <div id="auth-box">
+            <p>Vui lòng nhập Key hoặc kích hoạt Free để tiếp tục</p>
+            <input type="text" id="key" placeholder="NHẬP KEY VIP TẠI ĐÂY">
+            <button class="vip-btn" onclick="checkAccess()">KIỂM TRA & ĐĂNG NHẬP</button>
+            <button onclick="getFree()">VƯỢT LINK KÍCH HOẠT FREE</button>
+        </div>
+
+        <div id="bot-box" class="hidden">
+            <div id="screen">SẴN SÀNG SOI CẦU!</div>
+            <input type="text" id="hist" placeholder="bau,cua,tom | ca,ga,ga">
+            <button class="vip-btn" onclick="predict()">PHÂN TÍCH SOI CẦU</button>
+            <p style="font-size:0.7em; color:#888;">Nhập 3 ván gần nhất để có độ chính xác cao.</p>
         </div>
     </div>
 
     <script>
         let deviceId = "";
-        // THAY ĐÚNG LINK PYTHONANYWHERE CỦA ÔNG
-        const API = "https://tên-của-ông.pythonanywhere.com"; 
+        // THAY ĐÚNG LINK PYTHONANYWHERE (KHÔNG DẤU)
+        const API = "https://your_username.pythonanywhere.com"; 
 
         async function init() {
-            try {
-                const fp = await FingerprintJS.load();
-                const result = await fp.get();
-                deviceId = result.visitorId;
-                document.getElementById('my-id').innerText = deviceId;
-                document.getElementById('screen').innerText = "HỆ THỐNG SẴN SÀNG";
-            } catch (e) {
-                document.getElementById('screen').innerText = "LỖI KHỞI TẠO ID!";
-            }
+            const fp = await FingerprintJS.load();
+            const result = await fp.get();
+            deviceId = result.visitorId;
+            document.getElementById('my-id').innerText = deviceId;
         }
 
-        function getFree() {
-            if(!deviceId) return alert("Đang quét ID, đợi xíu!");
-            // Link rút gọn của ông
-            window.location.href = "https://link1s.com/st?api=TOKEN_CUA_ONG&url=" + encodeURIComponent(`${API}/activate?id=${deviceId}`);
+        async function checkAccess() {
+            const key = document.getElementById('key').value;
+            const btn = document.querySelector('.vip-btn');
+            btn.innerText = "ĐANG KIỂM TRA...";
+            
+            try {
+                // Gọi thử một lệnh predict ảo để check key
+                const res = await fetch(`${API}/predict`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id: deviceId, key: key, history: "bau,bau,bau|bau,bau,bau|bau,bau,bau" })
+                });
+                const data = await res.json();
+                
+                if (data.status === "ok") {
+                    document.getElementById('auth-box').classList.add('hidden');
+                    document.getElementById('bot-box').classList.remove('hidden');
+                } else {
+                    alert(data.msg);
+                    btn.innerText = "KIỂM TRA & ĐĂNG NHẬP";
+                }
+            } catch (e) {
+                alert("Lỗi kết nối Server! Kiểm tra lại link API.");
+                btn.innerText = "KIỂM TRA & ĐĂNG NHẬP";
+            }
         }
 
         async function predict() {
             const screen = document.getElementById('screen');
-            screen.innerText = "ĐANG PHÂN TÍCH...";
-            try {
-                const res = await fetch(`${API}/predict`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        id: deviceId, 
-                        key: document.getElementById('key').value, 
-                        history: document.getElementById('hist').value 
-                    })
-                });
-                const data = await res.json();
-                if(data.status === "ok") {
-                    // Hiển thị kết quả từ Server
-                    screen.innerHTML = `<span style="color:#0f0">${data.data}</span>`;
-                } else {
-                    screen.innerText = data.msg;
-                }
-            } catch (e) {
-                screen.innerText = "LỖI SERVER (KIỂM TRA RELOAD)";
-            }
+            screen.innerText = "ĐANG TÍNH...";
+            const res = await fetch(`${API}/predict`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    id: deviceId, 
+                    key: document.getElementById('key').value, 
+                    history: document.getElementById('hist').value 
+                })
+            });
+            const data = await res.json();
+            screen.innerHTML = data.status === "ok" ? `<span style="color:#0f0">${data.data}</span>` : data.msg;
+        }
+
+        function getFree() {
+            window.location.href = "https://link1s.com/st?api=TOKEN&url=" + encodeURIComponent(`${API}/activate?id=${deviceId}`);
         }
         init();
     </script>
