@@ -2,56 +2,45 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BOT VIP BC3.2 - AUTO TRACKING</title>
+    <title>BOT VIP BC3.2</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 20px; }
-        .box { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: 20px auto; background: #050505; box-shadow: 0 0 15px #0f0; border-radius: 10px; }
-        input { width: 90%; padding: 12px; margin: 10px 0; background: #111; color: #ff0; border: 1px solid #0f0; text-align: center; font-size: 1.1em; }
-        button { width: 95%; padding: 15px; margin: 5px 0; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; text-transform: uppercase; }
+        body { background: #000; color: #0f0; font-family: monospace; text-align: center; padding: 20px; }
+        .box { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: auto; background: #050505; box-shadow: 0 0 15px #0f0; }
+        input { width: 90%; padding: 12px; margin: 10px 0; background: #111; color: #ff0; border: 1px solid #0f0; text-align: center; }
+        button { width: 95%; padding: 15px; margin: 5px 0; font-weight: bold; cursor: pointer; border: none; }
         .btn-main { background: #0f0; color: #000; }
-        .btn-free { background: #333; color: #fff; font-size: 0.8em; }
         .hidden { display: none; }
-        #screen { background: #000; border: 1px solid #0f0; padding: 20px; min-height: 80px; margin: 15px 0; font-size: 1.3em; color: #fff; display: flex; align-items: center; justify-content: center; }
-        .history-tag { font-size: 0.7em; color: #888; margin-top: 10px; border-top: 1px solid #222; padding-top: 10px; }
+        #screen { border: 1px solid #0f0; padding: 20px; min-height: 60px; margin: 15px 0; color: #fff; font-size: 1.2em; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
-
     <div id="login-page" class="box">
-        <h2 style="color: #0f0;">HỆ THỐNG ĐĂNG NHẬP</h2>
-        <p style="font-size: 0.7em; color: #888;">ID: <span id="did-login">...</span></p>
-        <input type="text" id="key-input" placeholder="NHẬP MÃ KEY VIP/FREE">
-        <button class="btn-main" onclick="checkLogin()">VÀO HỆ THỐNG</button>
-        <button class="btn-free" onclick="getFree()">LẤY MÃ FREE (VƯỢT LINK)</button>
+        <h2>BOT VIP LOGIN</h2>
+        <p style="font-size: 0.7em;">ID: <span id="did">...</span></p>
+        <input type="text" id="key-input" placeholder="NHẬP KEY VIP/FREE">
+        <button class="btn-main" onclick="checkLogin()">ĐĂNG NHẬP</button>
+        <button style="background:#333;color:#fff" onclick="getFree()">LẤY MÃ FREE (VƯỢT LINK)</button>
     </div>
 
     <div id="main-bot" class="box hidden">
-        <div id="expiry-text" style="color: #ff0; font-size: 0.8em; margin-bottom: 10px;"></div>
-        
-        <div id="screen">NHẬP 3 VÁN ĐẦU TIÊN</div>
-        
-        <p id="input-guide" style="font-size: 0.8em; color: #aaa;">Nhập 3-5 ván (Cách nhau bằng dấu |):</p>
-        <input type="text" id="hist-input" placeholder="bau,cua,ca | tom,ga,huou | ...">
-        
-        <button class="btn-main" onclick="soiCau()">PHÂN TÍCH CẦU</button>
-        <button style="background: #440000; color: #ffaaaa; font-size: 0.7em;" onclick="location.reload()">THOÁT & XOÁ DỮ LIỆU</button>
-        
-        <div id="history-display" class="history-tag">Dữ liệu cầu: Trống</div>
+        <div id="expiry-text" style="color: #ff0; font-size: 0.8em;"></div>
+        <div id="screen">NHẬP 3 VÁN ĐẦU (CÁCH NHAU DẤU |)</div>
+        <input type="text" id="hist-input" placeholder="bau,cua,ca | tom,ga,ca | ...">
+        <button class="btn-main" onclick="soiCau()">PHÂN TÍCH</button>
+        <button style="background:red;color:#fff;font-size:0.7em" onclick="location.reload()">THOÁT & XOÁ DỮ LIỆU</button>
     </div>
 
     <script>
-        let dId = "";
-        let currentHistory = []; // Chỉ lưu trong bộ nhớ RAM, thoát web là mất
+        let dId = "", currentHistory = [];
         const API = "https://trustmebro.pythonanywhere.com";
 
         async function init() {
             const fp = await FingerprintJS.load();
             const res = await fp.get();
             dId = res.visitorId;
-            document.getElementById('did-login').innerText = dId;
-
+            document.getElementById('did').innerText = dId;
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('key')) {
                 document.getElementById('key-input').value = urlParams.get('key');
@@ -61,75 +50,38 @@
 
         async function checkLogin() {
             const key = document.getElementById('key-input').value;
-            if(!key) return alert("Chưa nhập Key!");
-            
-            try {
-                const response = await fetch(`${API}/predict`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ id: dId, key: key, history: "bau,bau,bau|bau,bau,bau|bau,bau,bau" })
-                });
-                const data = await response.json();
-                if (data.status === "ok") {
-                    document.getElementById('login-page').classList.add('hidden');
-                    document.getElementById('main-bot').classList.remove('hidden');
-                    document.getElementById('expiry-text').innerHTML = data.data.split("<br>")[0];
-                } else { alert(data.msg); }
-            } catch (e) { alert("Lỗi kết nối Server!"); }
+            const res = await fetch(`${API}/predict`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: dId, key: key, history: "bau,bau,bau|bau,bau,bau|bau,bau,bau" })
+            });
+            const data = await res.json();
+            if (data.status === "ok") {
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('main-bot').classList.remove('hidden');
+                document.getElementById('expiry-text').innerText = data.data.split("<br>")[0];
+            } else alert(data.msg);
         }
 
         async function soiCau() {
-            const scr = document.getElementById('screen');
-            const inputVal = document.getElementById('hist-input').value.trim().toLowerCase();
-            const key = document.getElementById('key-input').value;
-            const guide = document.getElementById('input-guide');
-
-            if (!inputVal) return alert("Nhập dữ liệu ván!");
-
-            // THUẬT TOÁN TỰ ĐỘNG CẬP NHẬT
-            if (inputVal.includes("|")) {
-                // Lần đầu nhập chuỗi ván (Ván cũ | ... | Ván mới nhất)
-                currentHistory = inputVal.split("|").map(s => s.trim());
-            } else {
-                // Các ván sau chỉ nhập 1 ván
-                currentHistory.push(inputVal);
-            }
-
-            // Giữ lại 5 ván gần nhất để soi, tự xóa ván cũ nhất (cuốn chiếu)
+            const val = document.getElementById('hist-input').value.trim();
+            if (val.includes("|")) currentHistory = val.split("|"); else currentHistory.push(val);
             if (currentHistory.length > 5) currentHistory.shift();
-
-            // Hiển thị lịch sử đang lưu để khách biết
-            document.getElementById('history-display').innerText = "Dữ liệu cầu: " + currentHistory.join(" | ");
-
-            if (currentHistory.length < 3) {
-                scr.innerHTML = "THIẾU " + (3 - currentHistory.length) + " VÁN NỮA";
-                return;
-            }
-
-            // Đổi hướng dẫn sau khi đã đủ 3 ván
-            guide.innerText = "Chỉ cần nhập 1 ván mới nhất tiếp theo:";
-            document.getElementById('hist-input').placeholder = "Ví dụ: ca,tom,bau";
-
-            scr.innerText = "ĐANG SOI...";
             
-            try {
-                const response = await fetch(`${API}/predict`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ id: dId, key: key, history: currentHistory.join("|") })
-                });
-                const data = await response.json();
-                if (data.status === "ok") {
-                    scr.innerHTML = data.data.split("<br>")[1];
-                    document.getElementById('hist-input').value = ""; // Clear ô nhập để chờ ván kế
-                } else { scr.innerText = data.msg; }
-            } catch (e) { scr.innerText = "Lỗi kết nối!"; }
+            const res = await fetch(`${API}/predict`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id: dId, key: document.getElementById('key-input').value, history: currentHistory.join("|") })
+            });
+            const data = await res.json();
+            if (data.status === "ok") {
+                document.getElementById('screen').innerHTML = data.data.split("<br>")[1];
+                document.getElementById('hist-input').value = "";
+                document.getElementById('hist-input').placeholder = "Chỉ cần nhập 1 ván mới nhất...";
+            } else alert(data.msg);
         }
 
         function getFree() {
             window.location.href = "https://link1s.com/st?api=TOKEN_CỦA_ÔNG&url=" + encodeURIComponent(`${API}/activate?id=${dId}`);
         }
-
         init();
     </script>
 </body>
