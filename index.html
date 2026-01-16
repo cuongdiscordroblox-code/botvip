@@ -2,135 +2,132 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BOT VIP BC3.2 - LOGIN</title>
+    <title>BOT VIP BC3.2 - AUTO TRACKING</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #000; color: #0f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
-        .box { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: 50px auto; background: #050505; box-shadow: 0 0 20px #0f0; border-radius: 10px; }
-        
-        /* Giao diện nhập liệu */
-        input { width: 90%; padding: 12px; margin: 10px 0; background: #111; color: #ff0; border: 1px solid #0f0; outline: none; border-radius: 5px; text-align: center; font-weight: bold; }
-        button { width: 95%; padding: 15px; margin: 5px 0; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; transition: 0.3s; }
-        
-        .btn-login { background: #0f0; color: #000; font-size: 1.1em; }
-        .btn-login:hover { background: #0c0; transform: scale(1.02); }
-        .btn-free { background: #333; color: #fff; font-size: 0.8em; margin-top: 15px; }
-        
-        /* Hiệu ứng ẩn/hiện */
+        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; text-align: center; padding: 20px; }
+        .box { border: 2px solid #0f0; padding: 20px; max-width: 400px; margin: 20px auto; background: #050505; box-shadow: 0 0 15px #0f0; border-radius: 10px; }
+        input { width: 90%; padding: 12px; margin: 10px 0; background: #111; color: #ff0; border: 1px solid #0f0; text-align: center; font-size: 1.1em; }
+        button { width: 95%; padding: 15px; margin: 5px 0; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; text-transform: uppercase; }
+        .btn-main { background: #0f0; color: #000; }
+        .btn-free { background: #333; color: #fff; font-size: 0.8em; }
         .hidden { display: none; }
-        
-        #screen { background: #000; border: 1px solid #0f0; padding: 20px; min-height: 80px; margin: 15px 0; font-size: 1.2em; display: flex; align-items: center; justify-content: center; color: #fff; }
-        .status-id { font-size: 0.7em; color: #888; margin-bottom: 20px; }
+        #screen { background: #000; border: 1px solid #0f0; padding: 20px; min-height: 80px; margin: 15px 0; font-size: 1.3em; color: #fff; display: flex; align-items: center; justify-content: center; }
+        .history-tag { font-size: 0.7em; color: #888; margin-top: 10px; border-top: 1px solid #222; padding-top: 10px; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 </head>
 <body>
 
     <div id="login-page" class="box">
-        <h2 style="color: #0f0; margin-bottom: 5px;">HỆ THỐNG BOT VIP</h2>
-        <p style="color: #ff0; font-size: 0.9em;">Vui lòng nhập Key để bắt đầu</p>
-        
-        <div class="status-id">ID MÁY: <span id="did-login">...</span></div>
-        
-        <input type="text" id="key-input" placeholder="DÁN MÃ KEY TẠI ĐÂY">
-        
-        <button class="btn-login" onclick="checkLogin()">ĐĂNG NHẬP NGAY</button>
-        <button class="btn-free" onclick="getFree()">LẤY MÃ FREE 24H (VƯỢT LINK)</button>
-        
-        <p style="font-size: 0.7em; color: #666; margin-top: 20px;">Liên hệ Admin để mua Key VIP không quảng cáo</p>
+        <h2 style="color: #0f0;">HỆ THỐNG ĐĂNG NHẬP</h2>
+        <p style="font-size: 0.7em; color: #888;">ID: <span id="did-login">...</span></p>
+        <input type="text" id="key-input" placeholder="NHẬP MÃ KEY VIP/FREE">
+        <button class="btn-main" onclick="checkLogin()">VÀO HỆ THỐNG</button>
+        <button class="btn-free" onclick="getFree()">LẤY MÃ FREE (VƯỢT LINK)</button>
     </div>
 
     <div id="main-bot" class="box hidden">
-        <h3 style="color: #0f0; margin-top: 0;">BOT PHÂN TÍCH BC3.2</h3>
-        <div class="status-id">HẠN DÙNG: <span id="expiry-text" style="color: #ff0;">Đang xác thực...</span></div>
+        <div id="expiry-text" style="color: #ff0; font-size: 0.8em; margin-bottom: 10px;"></div>
         
-        <div id="screen">SẴN SÀNG PHÂN TÍCH</div>
+        <div id="screen">NHẬP 3 VÁN ĐẦU TIÊN</div>
         
-        <p style="text-align: left; font-size: 0.8em; margin-left: 5%;">Nhập lịch sử (Ví dụ: bau,cua,tom|ca,ga,ga):</p>
-        <input type="text" id="hist-input" placeholder="ván 1 | ván 2 | ván 3">
+        <p id="input-guide" style="font-size: 0.8em; color: #aaa;">Nhập 3-5 ván (Cách nhau bằng dấu |):</p>
+        <input type="text" id="hist-input" placeholder="bau,cua,ca | tom,ga,huou | ...">
         
-        <button class="btn-login" onclick="soiCau()">BẮT ĐẦU SOI CẦU</button>
-        <button class="btn-free" onclick="location.reload()">ĐĂNG XUẤT / THOÁT</button>
+        <button class="btn-main" onclick="soiCau()">PHÂN TÍCH CẦU</button>
+        <button style="background: #440000; color: #ffaaaa; font-size: 0.7em;" onclick="location.reload()">THOÁT & XOÁ DỮ LIỆU</button>
+        
+        <div id="history-display" class="history-tag">Dữ liệu cầu: Trống</div>
     </div>
 
     <script>
         let dId = "";
-        // THAY LINK CỦA ÔNG VÀO ĐÂY (KHÔNG CÓ DẤU / Ở CUỐI)
-        const API = "https://trustmebro.pythonanywhere.com";
+        let currentHistory = []; // Chỉ lưu trong bộ nhớ RAM, thoát web là mất
+        const API = "https://cuongdiscordroblox.pythonanywhere.com";
 
-        // Khởi tạo ID máy khi mở web
         async function init() {
             const fp = await FingerprintJS.load();
             const res = await fp.get();
             dId = res.visitorId;
             document.getElementById('did-login').innerText = dId;
 
-            // Nếu khách quay về từ link activate, tự động điền key và thử login luôn
             const urlParams = new URLSearchParams(window.location.search);
-            const keyParam = urlParams.get('key');
-            if (keyParam) {
-                document.getElementById('key-input').value = keyParam;
+            if (urlParams.get('key')) {
+                document.getElementById('key-input').value = urlParams.get('key');
                 checkLogin();
             }
         }
 
-        // Hàm kiểm tra Key để chuyển màn hình
         async function checkLogin() {
             const key = document.getElementById('key-input').value;
-            if (!key) { alert("Vui lòng nhập Key!"); return; }
-
+            if(!key) return alert("Chưa nhập Key!");
+            
             try {
-                // Gọi thử API để check Key (Dùng dữ liệu ảo để test key)
                 const response = await fetch(`${API}/predict`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ id: dId, key: key, history: "bau,bau,bau|bau,bau,bau|bau,bau,bau" })
                 });
                 const data = await response.json();
-
                 if (data.status === "ok") {
-                    // Ẩn màn đăng nhập, hiện màn Bot
                     document.getElementById('login-page').classList.add('hidden');
                     document.getElementById('main-bot').classList.remove('hidden');
-                    // Hiển thị ngày hết hạn bóc tách từ kết quả trả về
-                    const cleanExpiry = data.data.split("<br>")[0]; 
-                    document.getElementById('expiry-text').innerHTML = cleanExpiry;
-                } else {
-                    alert("LỖI: " + data.msg);
-                }
-            } catch (e) {
-                alert("Không thể kết nối Server. Hãy kiểm tra lại API hoặc Reload PythonAnywhere.");
-            }
+                    document.getElementById('expiry-text').innerHTML = data.data.split("<br>")[0];
+                } else { alert(data.msg); }
+            } catch (e) { alert("Lỗi kết nối Server!"); }
         }
 
-        // Hàm soi cầu chính
         async function soiCau() {
             const scr = document.getElementById('screen');
-            const history = document.getElementById('hist-input').value;
+            const inputVal = document.getElementById('hist-input').value.trim().toLowerCase();
             const key = document.getElementById('key-input').value;
+            const guide = document.getElementById('input-guide');
 
-            if (!history) { alert("Hãy nhập lịch sử ván đấu!"); return; }
-            scr.innerText = "ĐANG TÍNH TOÁN...";
+            if (!inputVal) return alert("Nhập dữ liệu ván!");
 
-            const response = await fetch(`${API}/predict`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ id: dId, key: key, history: history })
-            });
-            const data = await response.json();
-            
-            if (data.status === "ok") {
-                scr.innerHTML = data.data.split("<br>")[1]; // Chỉ lấy phần DỰ ĐOÁN
+            // THUẬT TOÁN TỰ ĐỘNG CẬP NHẬT
+            if (inputVal.includes("|")) {
+                // Lần đầu nhập chuỗi ván (Ván cũ | ... | Ván mới nhất)
+                currentHistory = inputVal.split("|").map(s => s.trim());
             } else {
-                scr.innerHTML = `<span style="color:red">${data.msg}</span>`;
+                // Các ván sau chỉ nhập 1 ván
+                currentHistory.push(inputVal);
             }
+
+            // Giữ lại 5 ván gần nhất để soi, tự xóa ván cũ nhất (cuốn chiếu)
+            if (currentHistory.length > 5) currentHistory.shift();
+
+            // Hiển thị lịch sử đang lưu để khách biết
+            document.getElementById('history-display').innerText = "Dữ liệu cầu: " + currentHistory.join(" | ");
+
+            if (currentHistory.length < 3) {
+                scr.innerHTML = "THIẾU " + (3 - currentHistory.length) + " VÁN NỮA";
+                return;
+            }
+
+            // Đổi hướng dẫn sau khi đã đủ 3 ván
+            guide.innerText = "Chỉ cần nhập 1 ván mới nhất tiếp theo:";
+            document.getElementById('hist-input').placeholder = "Ví dụ: ca,tom,bau";
+
+            scr.innerText = "ĐANG SOI...";
+            
+            try {
+                const response = await fetch(`${API}/predict`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id: dId, key: key, history: currentHistory.join("|") })
+                });
+                const data = await response.json();
+                if (data.status === "ok") {
+                    scr.innerHTML = data.data.split("<br>")[1];
+                    document.getElementById('hist-input').value = ""; // Clear ô nhập để chờ ván kế
+                } else { scr.innerText = data.msg; }
+            } catch (e) { scr.innerText = "Lỗi kết nối!"; }
         }
 
-        // Hàm chuyển hướng vượt link
         function getFree() {
-            const rootLink = `${API}/activate?id=${dId}`;
-            // Thay TOKEN của ông vào đây
-            window.location.href = "https://link1s.com/st?api=TOKEN_CỦA_ÔNG&url=" + encodeURIComponent(rootLink);
+            window.location.href = "https://link1s.com/st?api=TOKEN_CỦA_ÔNG&url=" + encodeURIComponent(`${API}/activate?id=${dId}`);
         }
 
         init();
